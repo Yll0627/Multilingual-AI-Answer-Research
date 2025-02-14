@@ -9,8 +9,9 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "Multilingual Translator API"
     DEEPL_API_KEY: str = os.getenv("DEEPL_API_KEY", "")
     DEEPL_API_URL: str = "https://api-free.deepl.com/v2/translate"
-
+    OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
+    
     class Config:
         case_sensitive = True
 
-settings = Settings() 
+settings = Settings()
