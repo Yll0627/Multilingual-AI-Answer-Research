@@ -45,7 +45,7 @@ async def analyze_translations(translations: Dict[str, str], original_text: str)
         logger.error(f"OpenAI API error: {str(e)}")
         raise OpenAIError(f"OpenAI API error: {str(e)}")
 
-async def analyze_single_translation(
+async def ask_gpt(
     text: str,
     translated_text: str,
     lang_code: str
@@ -73,7 +73,7 @@ async def analyze_single_translation(
         logger.error(f"OpenAI API error for {lang_code}: {str(e)}")
         raise OpenAIError(f"OpenAI API error for {lang_code}: {str(e)}")
 
-async def analyze_all_translations(
+async def ask_gpt_all(
     translations: Dict[str, str],
     original_text: str
 ) -> Dict[str, str]:
@@ -83,7 +83,7 @@ async def analyze_all_translations(
     responses = {}
     for lang, translated_text in translations.items():
         try:
-            response = await analyze_single_translation(
+            response = await ask_gpt(
                 text=original_text,
                 translated_text=translated_text,
                 lang_code=lang

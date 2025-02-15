@@ -74,4 +74,4 @@ async def translate_text(
     source_lang: Optional[str] = None
 ) -> str:
     translations = await translate_to_multiple(text, [target_lang])
-    return translations[target_lang] 
+    return translations[target_lang]

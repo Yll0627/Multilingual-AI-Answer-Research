@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 from typing import Dict, List
 from ..core.translator_service import translate_to_multiple, TranslationError
-from ..core.openai_service import analyze_translations, analyze_all_translations, OpenAIError
+from ..core.openai_service import analyze_translations, ask_gpt_all, OpenAIError
 import logging
 
 logger = logging.getLogger(__name__)
@@ -19,16 +19,16 @@ class AutoTranslationRequest(BaseModel):
         default=False,
         description="Whether to analyze translations using OpenAI"
     )
-    individual_analysis: bool = Field(
+    question_response: bool = Field(
         default=False,
-        description="Whether to analyze each translation separately"
+        description="Whether to get responses for each translation as questions"
     )
 
 class AutoTranslationResponse(BaseModel):
     translations: Dict[str, str]
     detected_source_lang: str
     analysis: str | None = None
-    individual_analyses: Dict[str, str] | None = None
+    question_responses: Dict[str, str] | None = None
 
 @router.post("/translate/auto", response_model=AutoTranslationResponse)
 async def translate_auto(request: AutoTranslationRequest):
@@ -44,7 +44,7 @@ async def translate_auto(request: AutoTranslationRequest):
         detected_lang = translations.pop("detected_source_lang")
         
         analysis = None
-        individual_analyses = None
+        question_responses = None
         
         if request.analyze:
             try:
@@ -55,20 +55,20 @@ async def translate_auto(request: AutoTranslationRequest):
             except OpenAIError as e:
                 logger.error(f"Overall analysis failed: {str(e)}")
         
-        if request.individual_analysis:
+        if request.question_response:
             try:
-                individual_analyses = await analyze_all_translations(
+                question_responses = await ask_gpt_all(
                     translations=translations,
                     original_text=request.text
                 )
             except OpenAIError as e:
-                logger.error(f"Individual analyses failed: {str(e)}")
+                logger.error(f"Question responses failed: {str(e)}")
         
         return AutoTranslationResponse(
             translations=translations,
             detected_source_lang=detected_lang,
             analysis=analysis,
-            individual_analyses=individual_analyses
+            question_responses=question_responses
         )
     except TranslationError as e:
         raise HTTPException(status_code=400, detail=str(e))
