@@ -34,3 +34,5 @@ ENV/
 *.bak
 *.tmp
 *.cache
+
+askAI.txt
