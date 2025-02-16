@@ -1,7 +1,11 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 from typing import Dict, List
-from ..core.translator_service import translate_to_multiple, TranslationError
+from ..core.translator_service import (
+    translate_to_multiple, 
+    translate_responses_to_english,
+    TranslationError
+)
 from ..core.openai_service import analyze_translations, ask_gpt_all, OpenAIError
 import logging
 
@@ -29,6 +33,7 @@ class AutoTranslationResponse(BaseModel):
     detected_source_lang: str
     analysis: str | None = None
     question_responses: Dict[str, str] | None = None
+    english_responses: Dict[str, str] | None = None
 
 @router.post("/translate/auto", response_model=AutoTranslationResponse)
 async def translate_auto(request: AutoTranslationRequest):
@@ -45,6 +50,7 @@ async def translate_auto(request: AutoTranslationRequest):
         
         analysis = None
         question_responses = None
+        english_responses = None
         
         if request.analyze:
             try:
@@ -61,6 +67,9 @@ async def translate_auto(request: AutoTranslationRequest):
                     translations=translations,
                     original_text=request.text
                 )
+                
+                english_responses = await translate_responses_to_english(question_responses)
+                        
             except OpenAIError as e:
                 logger.error(f"Question responses failed: {str(e)}")
         
@@ -68,7 +77,8 @@ async def translate_auto(request: AutoTranslationRequest):
             translations=translations,
             detected_source_lang=detected_lang,
             analysis=analysis,
-            question_responses=question_responses
+            question_responses=question_responses,
+            english_responses=english_responses
         )
     except TranslationError as e:
         raise HTTPException(status_code=400, detail=str(e))

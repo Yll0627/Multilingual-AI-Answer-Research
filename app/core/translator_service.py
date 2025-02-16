@@ -75,3 +75,25 @@ async def translate_text(
 ) -> str:
     translations = await translate_to_multiple(text, [target_lang])
     return translations[target_lang]
+
+async def translate_responses_to_english(responses: Dict[str, str]) -> Dict[str, str]:
+    """
+    Translate all responses to English except those already in English
+    """
+    english_responses = {}
+    try:
+        for lang, response in responses.items():
+            if lang != "EN":  # Skip if already English
+                translations = await translate_to_multiple(
+                    text=response,
+                    target_langs=["EN"]
+                )
+                english_responses[lang] = translations["EN"]
+            else:
+                english_responses[lang] = response
+                
+        return english_responses
+        
+    except Exception as e:
+        logger.error(f"Failed to translate responses to English: {str(e)}")
+        raise TranslationError(f"Failed to translate responses to English: {str(e)}")
