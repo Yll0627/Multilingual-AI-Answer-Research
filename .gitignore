@@ -1,0 +1,36 @@
+# Python 相关
+__pycache__/
+*.py[cod]
+*.so
+*.egg-info/
+dist/
+build/
+*.log
+*.pot
+
+# 环境相关
+.env
+.venv/
+venv/
+env/
+ENV/
+
+# IDE 和编辑器相关
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sublime-workspace
+*.sublime-project
+
+# 数据文件
+*.csv
+*.json
+*.db
+*.sqlite3
+
+# 其他
+.DS_Store
+*.bak
+*.tmp
+*.cache
