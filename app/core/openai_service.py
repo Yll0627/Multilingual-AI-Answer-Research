@@ -23,8 +23,7 @@ async def analyze_translations(translations: Dict[str, str], original_text: str)
         
         Please analyze these translations and provide:
         1. Accuracy assessment
-        2. Cultural nuances
-        3. Any significant differences between translations
+        2. Any significant differences between translations
         """
         
         logger.info("Sending request to OpenAI API for overall analysis")
