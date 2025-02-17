@@ -1,10 +1,19 @@
 'use client'
 import { useState } from 'react'
 
+const LANGUAGES = [
+  { code: "EN", name: "English" },
+  { code: "DE", name: "German" },
+  { code: "FR", name: "French" },
+  { code: "JA", name: "Japanese" }
+]
+
 export default function Home() {
   const [inputText, setInputText] = useState('')
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState(null)
+  const [selectedLanguage, setSelectedLanguage] = useState(null)
+  const [isMultiLingual, setIsMultiLingual] = useState(true)
 
   const handleTranslate = async () => {
     try {
@@ -17,7 +26,8 @@ export default function Home() {
         body: JSON.stringify({
           text: inputText,
           target_langs: ["EN", "DE", "FR", "JA"],
-          analyze: true,
+          single_language: isMultiLingual ? null : selectedLanguage,
+          analyze: isMultiLingual,
           question_response: true
         }),
       })
@@ -38,16 +48,45 @@ export default function Home() {
         
         <div className="mb-6">
           <textarea
-            className="w-full p-4 border rounded-lg"
+            className="w-full p-4 border rounded-lg mb-4"
             rows={4}
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
             placeholder="Enter text to translate..."
           />
+          
+          <div className="flex items-center gap-4 mb-4">
+            <label className="flex items-center">
+              <input
+                type="checkbox"
+                checked={isMultiLingual}
+                onChange={(e) => setIsMultiLingual(e.target.checked)}
+                className="mr-2"
+              />
+              Multi-language Mode
+            </label>
+            
+            {!isMultiLingual && (
+              <select
+                value={selectedLanguage || ''}
+                onChange={(e) => setSelectedLanguage(e.target.value)}
+                className="p-2 border rounded"
+                disabled={isMultiLingual}
+              >
+                <option value="">Select Language</option>
+                {LANGUAGES.map(lang => (
+                  <option key={lang.code} value={lang.code}>
+                    {lang.name}
+                  </option>
+                ))}
+              </select>
+            )}
+          </div>
+
           <button
-            className="mt-2 px-6 py-2 bg-blue-600 text-white rounded-lg"
+            className="px-6 py-2 bg-blue-600 text-white rounded-lg"
             onClick={handleTranslate}
-            disabled={loading}
+            disabled={loading || (!isMultiLingual && !selectedLanguage)}
           >
             {loading ? 'Processing...' : 'Translate & Analyze'}
           </button>
