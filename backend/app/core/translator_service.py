@@ -12,10 +12,14 @@ class TranslationError(Exception):
 
 async def translate_to_multiple(
     text: str,
-    target_langs: List[str] = ["EN", "DE", "FR", "JA"]
+    target_langs: List[str] = ["EN-US", "AR", "ZH", "ES"]
 ) -> Dict[str, str]:
     """
     Auto-detect source language and translate text to multiple target languages
+    EN-US: English (American)
+    AR: Arabic
+    ZH: Chinese
+    ES: Spanish
     """
     # 添加 API key 验证
     if not settings.DEEPL_API_KEY:

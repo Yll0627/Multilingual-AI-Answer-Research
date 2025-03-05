@@ -6,7 +6,8 @@ from ..core.translator_service import (
     translate_responses_to_english,
     TranslationError
 )
-from ..core.openai_service import analyze_translations, ask_gpt_all, ask_gpt, OpenAIError
+# from ..core.openai_service import analyze_translations  # 暂时不使用翻译分析功能
+from ..core.openai_service import ask_gpt_all, ask_gpt, OpenAIError
 import logging
 
 logger = logging.getLogger(__name__)
@@ -16,16 +17,12 @@ router = APIRouter()
 class AutoTranslationRequest(BaseModel):
     text: str
     target_langs: List[str] = Field(
-        default=["EN", "DE", "FR", "JA"],
-        description="List of target language codes"
+        default=["EN-US", "AR", "ZH", "ES"],
+        description="List of target language codes: EN-US (American English), AR (Arabic), ZH (Chinese), ES (Spanish)"
     )
     single_language: Optional[str] = Field(
         default=None,
         description="Single language code for translation and response"
-    )
-    analyze: bool = Field(
-        default=False,
-        description="Whether to analyze translations using OpenAI"
     )
     question_response: bool = Field(
         default=False,
@@ -35,7 +32,6 @@ class AutoTranslationRequest(BaseModel):
 class AutoTranslationResponse(BaseModel):
     translations: Dict[str, str]
     detected_source_lang: str
-    analysis: str | None = None
     question_responses: Dict[str, str] | None = None
     english_responses: Dict[str, str] | None = None
 
@@ -55,19 +51,8 @@ async def translate_auto(request: AutoTranslationRequest):
         
         detected_lang = translations.pop("detected_source_lang")
         
-        analysis = None
         question_responses = None
         english_responses = None
-        
-        # 只有在多语言模式下才进行翻译分析
-        if request.analyze and not request.single_language:
-            try:
-                analysis = await analyze_translations(
-                    translations=translations,
-                    original_text=request.text
-                )
-            except OpenAIError as e:
-                logger.error(f"Overall analysis failed: {str(e)}")
         
         if request.question_response:
             try:
@@ -81,12 +66,12 @@ async def translate_auto(request: AutoTranslationRequest):
                     question_responses = {request.single_language: single_response}
                     
                     # 如果不是英语，则翻译成英语
-                    if request.single_language != "EN":
+                    if request.single_language != "EN-US":
                         english_translation = await translate_to_multiple(
                             text=single_response,
-                            target_langs=["EN"]
+                            target_langs=["EN-US"]
                         )
-                        english_responses = {request.single_language: english_translation["EN"]}
+                        english_responses = {request.single_language: english_translation["EN-US"]}
                 else:
                     # 多语言模式：获取所有语言的回答
                     question_responses = await ask_gpt_all(
@@ -101,7 +86,6 @@ async def translate_auto(request: AutoTranslationRequest):
         return AutoTranslationResponse(
             translations=translations,
             detected_source_lang=detected_lang,
-            analysis=analysis,
             question_responses=question_responses,
             english_responses=english_responses
         )

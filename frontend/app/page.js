@@ -2,11 +2,19 @@
 import { useState, useEffect, useRef } from 'react'
 
 const LANGUAGES = [
-  { code: "EN", name: "English" },
-  { code: "DE", name: "German" },
-  { code: "FR", name: "French" },
-  { code: "JA", name: "Japanese" }
+  { code: "EN-US", name: "English (US)" },
+  { code: "AR", name: "Arabic" },
+  { code: "ZH", name: "Chinese" },
+  { code: "ES", name: "Spanish" }
 ]
+
+// 首先添加一个语言名称映射
+const LANGUAGE_NAMES = {
+  "EN-US": "English (US)",
+  "AR": "Arabic",
+  "ZH": "Chinese",
+  "ES": "Spanish"
+}
 
 export default function Home() {
   const [inputText, setInputText] = useState('')
@@ -40,9 +48,8 @@ export default function Home() {
         },
         body: JSON.stringify({
           text: inputText,
-          target_langs: ["EN", "DE", "FR", "JA"],
+          target_langs: ["EN-US", "AR", "ZH", "ES"],
           single_language: isMultiLingual ? null : selectedLanguage,
-          analyze: isMultiLingual,
           question_response: true
         }),
       })
@@ -58,7 +65,7 @@ export default function Home() {
 
   return (
     <main className="min-h-screen p-8 bg-gray-50">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-7xl mx-auto">
         <h1 className="text-3xl font-bold mb-8">Multilingual AI System</h1>
         
         <div className="mb-6">
@@ -144,19 +151,12 @@ export default function Home() {
               <div className="grid grid-cols-2 gap-4">
                 {Object.entries(result.translations).map(([lang, text]) => (
                   <div key={lang} className="border p-4 rounded">
-                    <div className="font-medium">{lang}</div>
+                    <div className="font-medium">{LANGUAGE_NAMES[lang] || lang}</div>
                     <div>{text}</div>
                   </div>
                 ))}
               </div>
             </div>
-
-            {result.analysis && (
-              <div className="bg-white p-6 rounded-lg shadow">
-                <h2 className="text-xl font-semibold mb-4">Translation Analysis</h2>
-                <p className="whitespace-pre-line">{result.analysis}</p>
-              </div>
-            )}
 
             {result.question_responses && (
               <div className="bg-white p-6 rounded-lg shadow">
@@ -164,9 +164,9 @@ export default function Home() {
                 <div className="grid grid-cols-2 gap-4">
                   {Object.entries(result.question_responses).map(([lang, response]) => (
                     <div key={lang} className="border p-4 rounded">
-                      <div className="font-medium">{lang}</div>
+                      <div className="font-medium">{LANGUAGE_NAMES[lang] || lang}</div>
                       <div className="mt-2">{response}</div>
-                      {result.english_responses && lang !== 'EN' && (
+                      {result.english_responses && lang !== 'EN-US' && (
                         <div className="mt-2 text-gray-600 text-sm">
                           English: {result.english_responses[lang]}
                         </div>

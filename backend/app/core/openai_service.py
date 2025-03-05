@@ -8,41 +8,41 @@ logger = logging.getLogger(__name__)
 class OpenAIError(Exception):
     pass
 
-async def analyze_translations(translations: Dict[str, str], original_text: str) -> str:
-    """
-    Analyze all translations together using OpenAI GPT-4o-mini
-    """
-    try:
-        client = OpenAI(api_key=settings.OPENAI_API_KEY)
-        
-        prompt = f"""
-        Original text: {original_text}
-        
-        Translations:
-        {'\n'.join([f'{lang}: {text}' for lang, text in translations.items()])}
-        
-        Please analyze these translations and provide:
-        1. Accuracy assessment
-        2. Any significant differences between translations
-        """
-        
-        logger.info("Sending request to OpenAI API for overall analysis")
-        
-        completion = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[
-                {"role": "system", "content": "You are a multilingual translation expert."},
-                {"role": "user", "content": prompt}
-            ]
-        )
-        
-        analysis = completion.choices[0].message.content
-        logger.info("Received overall analysis from OpenAI")
-        return analysis
-        
-    except Exception as e:
-        logger.error(f"OpenAI API error: {str(e)}")
-        raise OpenAIError(f"OpenAI API error: {str(e)}")
+# async def analyze_translations(translations: Dict[str, str], original_text: str) -> str:
+#     """
+#     Analyze all translations together using OpenAI GPT-4o-mini
+#     """
+#     try:
+#         client = OpenAI(api_key=settings.OPENAI_API_KEY)
+#         
+#         prompt = f"""
+#         Original text: {original_text}
+#         
+#         Translations:
+#         {'\n'.join([f'{lang}: {text}' for lang, text in translations.items()])}
+#         
+#         Please analyze these translations and provide:
+#         1. Accuracy assessment for American English, Arabic, Chinese, and Spanish translations
+#         2. Any significant differences between translations
+#         """
+#         
+#         logger.info("Sending request to OpenAI API for overall analysis")
+#         
+#         completion = client.chat.completions.create(
+#             model="gpt-4o-mini",
+#             messages=[
+#                 {"role": "system", "content": "You are a multilingual translation expert, specializing in English, Arabic, Chinese, and Spanish."},
+#                 {"role": "user", "content": prompt}
+#             ]
+#         )
+#         
+#         analysis = completion.choices[0].message.content
+#         logger.info("Received overall analysis from OpenAI")
+#         return analysis
+#         
+#     except Exception as e:
+#         logger.error(f"OpenAI API error: {str(e)}")
+#         raise OpenAIError(f"OpenAI API error: {str(e)}")
 
 async def ask_gpt(
     text: str,
@@ -58,7 +58,7 @@ async def ask_gpt(
         logger.info(f"Sending {lang_code} translation as question to GPT")
         
         completion = client.chat.completions.create(
-            model="gpt-4o-mini",
+            model="gpt-4o",
             messages=[
                 {"role": "user", "content": translated_text}
             ]
